@@ -1,5 +1,5 @@
 //Requires database
-let database = require("./database/database.js")
+let database = require("./database.js")
 
 let pokemonmoves = [
 	{
