@@ -17,11 +17,13 @@ app.use(express.json())
 //Gets all pokemon as well as thier types
 app.get("/api/pokemon", (requestuest, response) => {
 	console.log("Getting all pokemon!!!!!!!!!!!!")
-	let selectpokemon = "SELECT * FROM pokemon"
+	let selectpokemon = "SELECT pokemon.name, group_concat(types.name) AS type, ability.name AS ability, pokemon.hp, pokemon.atk, pokemon.def, pokemon.spatk, pokemon.spdef, pokemon.spd, pokemon.total FROM pokemon JOIN ability ON pokemon.ability = ability.oid JOIN pokemontypes ON pokemontypes.pokemonID = pokemon.oid JOIN types ON types.oid = pokemontypes.typeID GROUP BY pokemon.name"
 	database.all(selectpokemon, (error, results) => {
-		if (error) console.error(new Error("Error getting all pokemon :", error))
+		if (error) {
+			console.error(new Error("Error getting all pokemon :", error))
+			response.send("Couldn't get all pokemon")
+		}
 		else response.send(results)
-		console.log(results)
 	})
 })
 
@@ -59,28 +61,29 @@ app.post('/api/pokemon',  (request, response) => {
 
 
 //Update Pokemon
-app.put('/api/pokemon/:id', (request,response) => {
+app.put("/api/pokemon/:id", (request,response) => {
+	console.log("Updating pokemon" + request.params.id)
 	//Use the keys in request.body to create dynamic SET values for the query string
 	let queryHelper = Object.keys(request.body).map(ele => `${ele} = ?`)
 	//Use the dynamic SET values in from queryHelper to build full UPDATE string
-	let updateOnePokemon = `UPDATE pokemon SET ${queryHelper.join(', ')} WHERE pokemon.oid = ?`;
+	let updateOnePokemon = `UPDATE pokemon SET ${queryHelper.join(", ")} WHERE pokemon.oid = ?`;
 	//Add values from request.body and the PokemonId to an array for use in database.run()
 	let queryValues = [...Object.values(request.body), request.params.id]
 	//Runs Query based on what was chosen for updates
 	database.run(updateOnePokemon, queryValues, function (error) {
 	    if (error) {
-	 	    console.log(new Error('Could not update Pokemon'), error)
+	 	    console.log(new Error("Could not update Pokemon"), error)
 	     	response.send("Could not update pokemon")
 	    } else {
 	      	console.log(`Pokemon with ID ${request.params.id} was updated successfully`)
 	     	response.send("Update Successful!")
 	    }
-	  })
+	})
 })
 
 //Delete pokemon
-app.delete('/api/pokemon/:id',  (request, response) => {
-	console.log('pokemons delete ', request.params.id);
+app.delete("/api/pokemon/:id",  (request, response) => {
+	console.log("pokemon delete ", request.params.id);
 	let selectpokemonbyID = "DELETE FROM pokemon WHERE oid = ?"
 	database.get(selectpokemonbyID, [request.params.id], (error) => {
 	    if (error) {
@@ -91,6 +94,70 @@ app.delete('/api/pokemon/:id',  (request, response) => {
 	})
 })
 
+
+/////////////ROUTES FOR POKEMON ABILITIES////////////////////////
+
+//Get all pokemon abilities
+app.get("/api/abilities", (request, response) => {
+	console.log("Getting all abilities")
+	let getAllAbilities = "SELECT * FROM ability"
+	database.all(getAllAbilities, (error, results) => {
+		if (error) {
+			console.error(new Error("Could not get all abilities", error))
+			response.send("Couldn't get all pokemon abilities")
+		}
+		else response.json(results)
+	})
+})
+
+//Create new pokemon ability
+app.post("/api/abilities", (request, response) => {
+	console.log("Adding a new author")
+	//Takes a JSON body with a the keys name (name of ability) and effect (description of the ability)
+	let body = request.body
+	let createAbility = "INSERT INTO ability VALUES (?, ?)"
+	database.run(createAbility, [body.name, body.effect], (error) => {
+		if (error) {
+			console.error(new Error("Could not add new ability"))
+			response.send("Could not create new ability")
+		}
+		else response.send(`${body.name} created!`)
+	})
+})
+
+//Update ability
+app.put("/api/abilities/:id", (request,response) => {
+	console.log("Updating abilities" + request.params.id)
+	//Use the keys in request.body to create dynamic SET values for the query string
+	let queryHelper = Object.keys(request.body).map(ele => `${ele} = ?`)
+	//Use the dynamic SET values in from queryHelper to build full UPDATE string
+	let updateOneAbility = `UPDATE ability SET ${queryHelper.join(", ")} WHERE ability.oid = ?`;
+	//Add values from request.body and the abilitiesId to an array for use in database.run()
+	let queryValues = [...Object.values(request.body), request.params.id]
+	//Runs Query based on what was chosen for updates
+	database.run(updateOneAbility, queryValues, function (error) {
+	    if (error) {
+	 	    console.log(new Error("Could not update abilities"), error)
+	     	response.send("Could not update abilities")
+	    } else {
+	      	console.log(`Ability with ID ${request.params.id} was updated successfully`)
+	     	response.send("Update Successful!")
+	    }
+	})
+})
+
+//Delete ability
+app.delete("/api/abilities/:id",  (request, response) => {
+	console.log("Abilities delete ", request.params.id);
+	let selectabilitybyID = "DELETE FROM ability WHERE oid = ?"
+	database.run(selectabilitybyID, [request.params.id], (error) => {
+	    if (error) {
+	      	console.error(new Error("Could not delete ability", error))
+	      	response.send("Could not delete ability")
+	    }
+	    else response.send("ability removed!")
+	})
+})
 
 //Starts Server
 app.listen(port, () => {
