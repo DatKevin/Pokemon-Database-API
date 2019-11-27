@@ -12,10 +12,12 @@ let port = 9000
 app.use(express.json())
 
 //Routes
-/////////////ROUTES FOR POKEMON////////////////////////
+/////////////////////////////////////////////////
+// Routes for Pokemon
+/////////////////////////////////////////////////
 
 //Gets all pokemon as well as thier types
-app.get("/api/pokemon", (requestuest, response) => {
+app.get("/api/pokemon", (request, response) => {
 	console.log("Getting all pokemon!!!!!!!!!!!!")
 	let selectpokemon = "SELECT pokemon.name, group_concat(types.name) AS type, ability.name AS ability, pokemon.hp, pokemon.atk, pokemon.def, pokemon.spatk, pokemon.spdef, pokemon.spd, pokemon.total FROM pokemon JOIN ability ON pokemon.ability = ability.oid JOIN pokemontypes ON pokemontypes.pokemonID = pokemon.oid JOIN types ON types.oid = pokemontypes.typeID GROUP BY pokemon.name"
 	database.all(selectpokemon, (error, results) => {
@@ -95,7 +97,9 @@ app.delete("/api/pokemon/:id",  (request, response) => {
 })
 
 
-/////////////ROUTES FOR POKEMON ABILITIES////////////////////////
+/////////////////////////////////////////////////
+// Routes for Pokemon Abilities
+/////////////////////////////////////////////////
 
 //Get all pokemon abilities
 app.get("/api/abilities", (request, response) => {
@@ -158,6 +162,89 @@ app.delete("/api/abilities/:id",  (request, response) => {
 	    else response.send("ability removed!")
 	})
 })
+
+
+/////////////////////////////////////////////////
+// Routes for Pokemon Types
+/////////////////////////////////////////////////
+
+//Gets all pokemon types
+app.get("/api/types", (request, response) => {
+	console.log("Getting all types")
+	let selectTypes = "SELECT * FROM types"
+	database.all(selectTypes, (error, results) => {
+		if (error) {
+			console.error(new Error("Error getting all pokemon types:", error))
+			response.send("Couldn't get all pokemon type")
+		}
+		else response.send(results)
+	})
+})
+
+//Get one pokemon type
+app.get('/api/types/:id',  (request, response) => {
+  //Find a type by OID
+  	console.log('Find type', request.params.id)
+  	let selecttypebyID = "SELECT * FROM types WHERE oid = ?"
+  	database.get(selecttypebyID, [request.params.id], (error,results) => {
+	    if (error) {
+	    	console.error(new Error("Could not get a type", error))
+	    	response.send("Could not find type with that ID")
+	    }
+	    else response.json(results)
+	})
+})
+
+//Create new pokemon type
+app.post('/api/types',  (request, response) => {
+	//Create new type with form data (`request.body`)
+	console.log('Create type: ', request.body)
+	let body = request.body
+	let createtype = "INSERT INTO types VALUES (?)"
+	database.run(createtype, [body.name], (error) => {
+	    if (error) {
+	    	console.error(new Error("Could not create type", error))
+	    	response.send("Could not create type")
+	    }
+	    else {
+	      console.log(request.body)
+	      response.send("type added!")
+	    }
+	})
+})
+
+
+//Update type
+app.put("/api/types/:id", (request,response) => {
+	console.log("Updating type " + request.params.id)
+	let body = request.body
+	//Takes the key name: to change name of type
+	let updateOnetype = `UPDATE types SET name = ? WHERE types.oid = ?`;
+	//Runs Query based on what was chosen for updates
+	database.run(updateOnetype, [body.name, request.params.id], function (error) {
+	    if (error) {
+	 	    console.log(new Error("Could not update type"), error)
+	     	response.send("Could not update type")
+	    } else {
+	      	console.log(`type ${body.name} was updated successfully`)
+	     	response.send("Update Successful!")
+	    }
+	})
+})
+
+//Delete type
+app.delete("/api/types/:id",  (request, response) => {
+	console.log("type delete ", request.params.id);
+	let selectTypebyID = "DELETE FROM types WHERE oid = ?"
+	database.get(selectTypebyID, [request.params.id], (error) => {
+	    if (error) {
+	      	console.error(new Error("Could not delete type", error))
+	      	response.send("Could not delete type")
+	    }
+	    else response.send("type removed!")
+	})
+})
+
 
 //Starts Server
 app.listen(port, () => {
