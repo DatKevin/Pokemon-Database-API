@@ -245,6 +245,89 @@ app.delete("/api/types/:id",  (request, response) => {
 	})
 })
 
+/////////////////////////////////////////////////
+// Routes for Pokemon Moves
+/////////////////////////////////////////////////
+
+//Gets all pokemon Moves
+app.get("/api/moves", (request, response) => {
+	console.log("Getting all moves")
+	let selectmoves = "SELECT * FROM moves"
+	database.all(selectmoves, (error, results) => {
+		if (error) {
+			console.error(new Error("Error getting all pokemon moves:", error))
+			response.send("Couldn't get all pokemon moves")
+		}
+		else response.send(results)
+	})
+})
+
+//Get one pokemon move
+app.get('/api/moves/:id',  (request, response) => {
+  //Find a move by OID
+  	console.log('Find move', request.params.id)
+  	let selectmovebyID = "SELECT * FROM moves WHERE oid = ?"
+  	database.get(selectmovebyID, [request.params.id], (error,results) => {
+	    if (error) {
+	    	console.error(new Error("Could not get move", error))
+	    	response.send("Could not find move with that ID")
+	    }
+	    else response.json(results)
+	})
+})
+
+//Create new pokemon move
+app.post('/api/moves',  (request, response) => {
+	//Create new move with form data (`request.body`)
+	console.log('Create move: ', request.body)
+	let body = request.body
+	let createmove = "INSERT INTO moves VALUES (?, ?, ? ,? ,?)"
+	database.run(createmove, [body.name, body.type, body.power, body.accuracy, body.description], (error) => {
+	    if (error) {
+	    	console.error(new Error("Could not create move", error))
+	    	response.send("Could not create move")
+	    }
+	    else {
+	      console.log(request.body)
+	      response.send("move added!")
+	    }
+	})
+})
+
+
+//Update move
+app.put("/api/moves/:id", (request,response) => {
+	console.log("Updating moves" + request.params.id)
+	//Use the keys in request.body to create dynamic SET values for the query string
+	let queryHelper = Object.keys(request.body).map(ele => `${ele} = ?`)
+	//Use the dynamic SET values in from queryHelper to build full UPDATE string
+	let updateOneMove = `UPDATE move SET ${queryHelper.join(", ")} WHERE move.oid = ?`;
+	//Add values from request.body and the movesId to an array for use in database.run()
+	let queryValues = [...Object.values(request.body), request.params.id]
+	//Runs Query based on what was chosen for updates
+	database.run(updateOneMove, queryValues, function (error) {
+	    if (error) {
+	 	    console.log(new Error("Could not update move"), error)
+	     	response.send("Could not update move")
+	    } else {
+	      	console.log(`move with ID ${request.params.id} was updated successfully`)
+	     	response.send("Update Successful!")
+	    }
+	})
+})
+
+//Delete move
+app.delete("/api/moves/:id",  (request, response) => {
+	console.log("move delete ", request.params.id);
+	let selectmovebyID = "DELETE FROM moves WHERE oid = ?"
+	database.get(selectmovebyID, [request.params.id], (error) => {
+	    if (error) {
+	      	console.error(new Error("Could not delete move", error))
+	      	response.send("Could not delete move")
+	    }
+	    else response.send("move removed!")
+	})
+})
 
 //Starts Server
 app.listen(port, () => {
