@@ -266,6 +266,7 @@ Put /api/pokemontypes (requires JSON body)
 - SQLite3
 - Postman
 - DB Browser
+- Trello: https://trello.com/b/3FA2gwLp/pokemon-database-api
 
 
 ## Next Steps
