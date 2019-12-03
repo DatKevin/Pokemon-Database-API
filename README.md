@@ -84,7 +84,7 @@ A trait that determines a Pokemon's strength and weakness against other types
 Get /api/types/{id}
 ```
 {
-	"name": "Fire"
+    "name": "Fire"
 }
 ```
 Post /api/types (requires JSON body)
@@ -116,10 +116,10 @@ Get /api/abilities/{id}
 ```
 Post /api/abilities/ (requires JSON body)
 ```
-    {
+{
         "name": "Cursed Bunny",
         "effect": "When hit summons a ghost bunny"
-    }
+}
 ```
 ### Abilities Table Data
 | Name   | Description            | Type |
@@ -150,11 +150,11 @@ Post /api/moves/ (requires JSON body)
 (type should be the associated type ID)
 ```
 {
-    "name": "Rock Slide",
-    "type": 12,
-    "power": 85,
-    "accuracy": 95,
-    "description": "Has a small chance to flinch the opponent"
+  	"name": "Rock Slide",
+	"type": 12,
+ 	"power": 85,
+ 	"accuracy": 95,
+ 	"description": "Has a small chance to flinch the opponent"
 }
 ```
 
@@ -239,8 +239,8 @@ Join table that shows the many to many relationship of Pokemon and their typing.
 Get /api/pokemontypes/{id}
 ```
  {
-"name": "Hawlucha",
-"type": "Flying,Fighting"
+    "name": "Hawlucha",
+    "type": "Flying,Fighting"
 }
 ```
 Post-Delete /api/pokemontypes (requires JSON body)
