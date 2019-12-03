@@ -1,7 +1,7 @@
 # Competitive Pokemon Database API
 This API was created to store Pokemon and their associated stats for the purposes of competitive battling. The database also contains an assortment of Pokemon abilities and recommended moves for said Pokemon. 
 
-![Table Relationships](https://imgur.com/a/kNt5NjD)
+![Table Relationships](https://imgur.com/qzy75gM)
 
 ### Table of Contents
 - Routes
@@ -13,7 +13,7 @@ This API was created to store Pokemon and their associated stats for the purpose
 - Next Steps
 # Routes
 ## Pokemon 
-Get /api/pokemon/{id}
+Get-Put-Delete /api/pokemon/{id}
 ```
 
 {
@@ -29,7 +29,7 @@ Get /api/pokemon/{id}
 	"total": 540
 }
 ```
-Post /api/pokemon
+Post /api/pokemon (requires JSON body)
 (type should be an array and the relational pokemon types table will update)
 ```
 {
@@ -59,13 +59,13 @@ Post /api/pokemon
 | total   | Total sum of all stats                                               | Integer |
 
 ## Types
-Get /api/types/{id}
+Get-Put-Delete /api/types/{id}
 ```
 {
 	"name": "Fire"
 }
 ```
-Post /api/types
+Post /api/types (requires JSON body)
 ```
 {
     "name": "Fairy"
@@ -77,14 +77,14 @@ Post /api/types
 | name | Name of Pokemon Type | Text |
 
 ## Ability
-Get /api/abilities/{id}
+Get-Put-Delete /api/abilities/{id}
 ```
 {
 	"name": "Cursed Body",
 	"effect": "When hit with a damaging move, has a 30% chance to disable that move"
 }
 ```
-Post /api/abilities/
+Post /api/abilities/ (requires JSON body)
 ```
     {
         "name": "Cursed Bunny",
@@ -98,7 +98,7 @@ Post /api/abilities/
 | effect | Description of ability | Text |
 
 ## Moves
-Get /api/moves/{id}
+Get-Put-Delete /api/moves/{id}
 ```
 {
 	"name": "Earthquake",
@@ -108,7 +108,7 @@ Get /api/moves/{id}
 	"description": "Doubles damage if the opponent uses dig"
 }
 ```
-Post /api/moves/
+Post /api/moves/ (requires JSON body)
 (type should be the associated type ID)
 ```
 {
@@ -128,6 +128,59 @@ Post /api/moves/
 | power       | Base damage of the Pokemon attack                     | Integer |
 | accuracy    | Base accuracy of the attack that determines liklihood | Integer |
 | description | The effect of the Pokemon move                        | Text    |
+
+
+### Pokemon Moves
+Get /api/movesets/{id}
+```
+    {
+        "pokemon": "Arcanine",
+        "move": "Play Rough",
+        "type": 7,
+        "power": 90,
+        "accuracy": 90,
+        "description": "Has a 10% chance to lower the opponent's attack by 1 stage"
+    },
+    {
+        "pokemon": "Arcanine",
+        "move": "Snarl",
+        "type": 17,
+        "power": 55,
+        "accuracy": 95,
+        "description": "Lowers the opponent's special attack by 1 stage"
+    },
+    {
+        "pokemon": "Arcanine",
+        "move": "Close Combat",
+        "type": 8,
+        "power": 120,
+        "accuracy": 100,
+        "description": "Lowers the user's defense and special defence by 1 stage"
+    },
+    {
+        "pokemon": "Arcanine",
+        "move": "Crunch",
+        "type": 17,
+        "power": 80,
+        "accuracy": 100,
+        "description": "Has a 20% chance to lower opponent's defencec by 1 stage"
+    }
+```
+Post-Delete /api/movesets (requires JSON body)
+```
+{
+    "pokemonID":"3",
+    "moveID":"1"
+}
+```
+Put /api/movesets (requires JSON body)
+```
+{
+    "pokemonID": "3",
+    "oldID": "11",
+    "newID": "14"
+}
+```
 
 
 ## Technologies Used
