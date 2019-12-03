@@ -1,6 +1,8 @@
 # Competitive Pokemon Database API
 This API was created to store Pokemon and their associated stats for the purposes of competitive battling. The database also contains an assortment of Pokemon abilities and recommended moves for said Pokemon. 
 
+![Table Relationships](https://imgur.com/a/kNt5NjD)
+
 ### Table of Contents
 - Routes
 -- Pokemon
@@ -13,6 +15,7 @@ This API was created to store Pokemon and their associated stats for the purpose
 ## Pokemon 
 Get /api/pokemon/{id}
 ```
+
 {
 	"name": "Gyrados",
 	"type": "Flying,Water",
