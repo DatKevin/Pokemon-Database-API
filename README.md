@@ -47,16 +47,16 @@ Post /api/pokemon (requires JSON body)
 (type should be an array and the relational Pokemon types table will update)
 ```
 {
-    "name": "Dragapult",
-    "type": ["Dragon", "Ghost"],
-    "ability": 3,
-    "hp": 88,
-    "atk": 120,
-    "def": 75,
-    "spatk": 100,
-    "spdef": 75,
-    "spd": 142,
-    "total": 600
+ 	"name": "Dragapult",
+ 	"type": ["Dragon", "Ghost"],
+	"ability": 3,
+ 	"hp": 88,
+    	"atk": 120,	
+	"def": 75,
+	"spatk": 100,
+	"spdef": 75,
+	"spd": 142,
+	"total": 600
 }
 ```
 ### Pokemon Table Data
@@ -84,13 +84,13 @@ A trait that determines a Pokemon's strength and weakness against other types
 Get /api/types/{id}
 ```
 {
-    "name": "Fire"
+	"name": "Fire"
 }
 ```
 Post /api/types (requires JSON body)
 ```
 {
-    "name": "Fairy"
+	"name": "Fairy"
 }
 ```
 ### Types Table Data
@@ -215,16 +215,16 @@ Get /api/movesets/{id}
 Post-Delete /api/movesets (requires JSON body)
 ```
 {
-    "pokemonID":"3",
-    "moveID":"1"
+	"pokemonID":"3",
+ 	"moveID":"1"
 }
 ```
 Put /api/movesets (requires JSON body)
 ```
 {
-    "pokemonID": "3",
-    "oldID": "11",
-    "newID": "14"
+ 	"pokemonID": "3",
+ 	"oldID": "11",
+ 	"newID": "14"
 }
 ```
 ### Pokemon Types
@@ -238,24 +238,24 @@ Join table that shows the many to many relationship of Pokemon and their typing.
 | DELETE | /api/pokemontypes/ | Deletes one Pokemon's type based on ID. Requires a JSON body with keys listed in the DELETE example below    |
 Get /api/pokemontypes/{id}
 ```
- {
-    "name": "Hawlucha",
-    "type": "Flying,Fighting"
+{
+ 	"name": "Hawlucha",
+ 	"type": "Flying,Fighting"
 }
 ```
 Post-Delete /api/pokemontypes (requires JSON body)
 ```
 {
-    "pokemonID":"3",
-    "typeID":"11"
+    	"pokemonID":"3",
+    	"typeID":"11"
 }
 ```
 Put /api/pokemontypes (requires JSON body)
 ```
 {
-    "pokemonID": "3",
-    "oldID": "11",
-    "newID": "14"
+   	"pokemonID": "3",
+   	"oldID": "11",
+  	"newID": "14"
 }
 ```
 
