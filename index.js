@@ -33,11 +33,11 @@ app.get("/api/pokemon", (request, response) => {
 app.get('/api/pokemon/:id',  (request, response) => {
   //Find a pokemon by OID
   	console.log('Find pokemon', request.params.id)
-  	let selectpokemonbyID = "SELECT * FROM pokemon WHERE oid = ?"
+  	let selectpokemonbyID = "SELECT pokemon.name, group_concat(types.name) AS type, ability.name AS ability, pokemon.hp, pokemon.atk, pokemon.def, pokemon.spatk, pokemon.spdef, pokemon.spd, pokemon.total FROM pokemon JOIN ability ON pokemon.ability = ability.oid JOIN pokemontypes ON pokemontypes.pokemonID = pokemon.oid JOIN types ON types.oid = pokemontypes.typeID WHERE pokemon.oid = ? GROUP BY pokemon.name"
   	database.get(selectpokemonbyID, [request.params.id], (error,results) => {
 	    if (error) {
 	    	console.error(new Error("Could not get single pokemon", error))
-	    	response.send("Could not find pokemon with that ID")
+	    	response.send(`Could not find ${request.params.id} in the database`)
 	    }
 	    else response.json(results)
 	})
@@ -45,18 +45,28 @@ app.get('/api/pokemon/:id',  (request, response) => {
 
 //Create new Pokemon
 app.post('/api/pokemon',  (request, response) => {
-	//Create new Pokemon with form data (`request.body`)
+	//Create new Pokemon with form data (request.body)
 	console.log('Create pokemon: ', request.body)
 	let body = request.body
+	//type should be in an array
+	let type = body.type
 	let createPokemon = "INSERT INTO pokemon VALUES (?,?,?,?,?,?,?,?,?)"
-	database.run(createPokemon, [body.name, body.ability, body.hp, body.atk, body.def, body.spatk, body.spdef, body.spd, body.total], (error) => {
+	database.run(createPokemon, [body.name, body.ability, body.hp, body.atk, body.def, body.spatk, body.spdef, body.spd, body.total], function(error) {
 	    if (error) {
 	    	console.error(new Error("Could not create pokemon", error))
 	    	response.send("Could not create pokemon")
 	    }
 	    else {
-	      console.log(request.body)
-	      response.send("Pokemon added!")
+	    	console.log("Adding to pokemon types table")
+	    	let addPokemontype = "INSERT INTO pokemontypes SELECT pokemon.oid, types.oid FROM pokemon, types WHERE pokemon.oid = ? AND types.name = ?"
+	    	for (types of type) {
+	    		database.run(addPokemontype, [this.lastID, types], (error) => {
+	    			if (error) {
+	    				console.error(new Error("Could not add types", error))
+	    			}
+	    			else response.send("Pokemon has been added!")
+	    		})
+	    	}
 	    }
 	})
 })
@@ -77,7 +87,7 @@ app.put("/api/pokemon/:id", (request,response) => {
 	 	    console.log(new Error("Could not update Pokemon"), error)
 	     	response.send("Could not update pokemon")
 	    } else {
-	      	console.log(`Pokemon with ID ${request.params.id} was updated successfully`)
+	      	console.log(`${request.params.id} was updated successfully`)
 	     	response.send("Update Successful!")
 	    }
 	})
@@ -111,6 +121,20 @@ app.get("/api/abilities", (request, response) => {
 			response.send("Couldn't get all pokemon abilities")
 		}
 		else response.json(results)
+	})
+})
+
+//Get one ability
+app.get('/api/abilities/:id',  (request, response) => {
+  //Find an ability by oid
+  	console.log('Find pokemon', request.params.id)
+  	let selectpokemonbyID = "SELECT * FROM ability WHERE oid = ?"
+  	database.get(selectpokemonbyID, [request.params.id], (error,results) => {
+	    if (error) {
+	    	console.error(new Error("Could not get single ability", error))
+	    	response.send(`Could not find id ${request.params.id} in the database`)
+	    }
+	    else response.json(results)
 	})
 })
 
@@ -252,7 +276,7 @@ app.delete("/api/types/:id",  (request, response) => {
 //Gets all pokemon Moves
 app.get("/api/moves", (request, response) => {
 	console.log("Getting all moves")
-	let selectmoves = "SELECT * FROM moves"
+	let selectmoves = "SELECT moves.name, types.name AS type, moves.power, moves.accuracy, moves.description FROM moves JOIN types ON types.oid = moves.type"
 	database.all(selectmoves, (error, results) => {
 		if (error) {
 			console.error(new Error("Error getting all pokemon moves:", error))
@@ -266,7 +290,7 @@ app.get("/api/moves", (request, response) => {
 app.get('/api/moves/:id',  (request, response) => {
   //Find a move by OID
   	console.log('Find move', request.params.id)
-  	let selectmovebyID = "SELECT * FROM moves WHERE oid = ?"
+  	let selectmovebyID = "SELECT moves.name, types.name AS type, moves.power, moves.accuracy, moves.description FROM moves JOIN types ON types.oid = moves.type WHERE moves.oid = ?"
   	database.get(selectmovebyID, [request.params.id], (error,results) => {
 	    if (error) {
 	    	console.error(new Error("Could not get move", error))
@@ -301,7 +325,7 @@ app.put("/api/moves/:id", (request,response) => {
 	//Use the keys in request.body to create dynamic SET values for the query string
 	let queryHelper = Object.keys(request.body).map(ele => `${ele} = ?`)
 	//Use the dynamic SET values in from queryHelper to build full UPDATE string
-	let updateOneMove = `UPDATE move SET ${queryHelper.join(", ")} WHERE move.oid = ?`;
+	let updateOneMove = `UPDATE moves SET ${queryHelper.join(", ")} WHERE moves.oid = ?`;
 	//Add values from request.body and the movesId to an array for use in database.run()
 	let queryValues = [...Object.values(request.body), request.params.id]
 	//Runs Query based on what was chosen for updates
@@ -326,6 +350,154 @@ app.delete("/api/moves/:id",  (request, response) => {
 	      	response.send("Could not delete move")
 	    }
 	    else response.send("move removed!")
+	})
+})
+
+/////////////////////////////////////////////////
+// Routes for Pokemon Moves Sets
+/////////////////////////////////////////////////
+
+//Returns all pokemon and thier associated moves
+app.get("/api/movesets", (request, response) => {
+	console.log("Getting all movesets")
+	let getallmovesets = "SELECT pokemon.name AS pokemon, moves.name AS move, moves.type, moves.power, moves.accuracy, moves.description FROM pokemon JOIN pokemonmoves ON pokemon.oid = pokemonmoves.pokemonID JOIN moves ON moves.oid = pokemonmoves.moveID ORDER BY pokemon.name"
+	database.all(getallmovesets, (error, results) => {
+		if (error) {
+			console.error(new Error("Could not get all movesets", error))
+			response.send("Could not get all movesets")
+		}
+		else response.json(results)
+	})
+})
+
+//Get a single pokemon with it's moveset
+app.get("/api/movesets/:id", (request, response) => {
+	console.log("Getting all movesets for" + request.params.id)
+	let getSinglePokemonMoveset = "SELECT pokemon.name AS pokemon, moves.name AS move, moves.type, moves.power, moves.accuracy, moves.description FROM pokemon JOIN pokemonmoves ON pokemon.oid = pokemonmoves.pokemonID JOIN moves ON moves.oid = pokemonmoves.moveID WHERE pokemon.oid = ?"
+	database.all(getSinglePokemonMoveset, [request.params.id], (error, results) => {
+		if (error) {
+			console.error(new Error("Could not get movesets for pokemon", error))
+			response.send("Could not get moveset for pokemon with id: " + request.params.id)
+		}
+		else response.json(results)
+	})
+})
+
+//Add a move to a pokemon's moveset
+app.post("/api/movesets", (request, response) => {
+	console.log("Updating moveset")
+	let body = request.body
+	let addmove = "INSERT INTO pokemonmoves SELECT pokemon.oid, moves.oid FROM pokemon, moves WHERE pokemon.oid = ? AND moves.oid = ?"
+	//takes in a JSON with keys of pokemon (Pokemon oid) and move (oid of move being added)
+	database.run(addmove,[body.pokemonID, body.moveID], (error) => {
+		if (error) {
+			console.error(new Error("Could not add new moveset", error))
+			response.send("Move failed to be added")
+		}
+		else response.send("Move added!")
+	})
+})
+
+//Updates and changes an existing pokemon moveset
+app.put("/api/movesets", (request, response) => {
+	console.log("Updating pokemon moveset")
+	let body = request.body
+	let updatemoveset = "UPDATE pokemonmoves SET moveID = ? WHERE pokemonID = ? AND moveID = ?"
+	//Takes in a JSON with keys of pokemonID, oldID (old move ID), newID (new move ID)
+	database.run(updatemoveset, [body.newID, body.pokemonID, body.oldID], (error) => {
+		if (error) {
+			console.error(new Error("Could not update move", error))
+			response.send("Could not update move")
+		}
+		else response.send("Move updated!")
+	})
+})
+
+//Deletes an existing move
+app.delete("/api/movesets", (request,response) => {
+	console.log("Deleting a move")
+	let body = request.body
+	let deletemoveset = "DELETE FROM pokemonmoves WHERE pokemonID = ? AND moveID = ? "
+	//Takes in a JSON with keys of pokemonID and moveID that is to be deleted
+	database.run(deletemoveset, [body.pokemonID, body.moveID], (error) => {
+		if (error) {
+			console.error(new Error("Could not delete pokemon move"))
+		}
+		else response.send("Move Deleted!")
+	})
+})
+
+/////////////////////////////////////////////////
+// Routes for Pokemon Types
+/////////////////////////////////////////////////
+
+//Returns all pokemon and thier associated type(s)
+app.get("/api/pokemontypes", (request, response) => {
+	console.log("Getting all pokemontypes")
+	let getallpokemontypes = "SELECT pokemon.name, group_concat(types.name) AS type FROM pokemon JOIN pokemontypes ON pokemontypes.pokemonID = pokemon.oid JOIN types ON types.oid = pokemontypes.typeID GROUP BY pokemon.name"
+	database.all(getallpokemontypes, (error, results) => {
+		if (error) {
+			console.error(new Error("Could not get all pokemontypes", error))
+			response.send("Could not get all pokemontypes")
+		}
+		else response.json(results)
+	})
+})
+
+//Get a single pokemon with it's typing
+app.get("/api/pokemontypes/:id", (request, response) => {
+	console.log("Getting all pokemontypes for" + request.params.id)
+	let getSinglePokemonType = "SELECT pokemon.name, group_concat(types.name) AS type FROM pokemon JOIN pokemontypes ON pokemontypes.pokemonID = pokemon.oid JOIN types ON types.oid = pokemontypes.typeID WHERE pokemon.oid = ? GROUP BY pokemon.name"
+	database.all(getSinglePokemonType, [request.params.id], (error, results) => {
+		if (error) {
+			console.error(new Error("Could not get pokemontype(s) for pokemon", error))
+			response.send("Could not get types for pokemon: " + request.params.id)
+		}
+		else response.json(results)
+	})
+})
+
+//Add a pokemon type
+app.post("/api/pokemontypes", (request, response) => {
+	console.log("Updating moveset")
+	let body = request.body
+	let addtype = "INSERT INTO pokemontypes VALUES (?, ?)"
+	//takes in a JSON with keys of pokemon (Pokemon oid) and type (oid of the type being added)
+	database.run(addtype,[body.pokemonID, body.typeID], (error) => {
+		if (error) {
+			console.error(new Error("Could not add new type", error))
+			response.send("Type failed to be added")
+		}
+		else response.send("Type added!")
+	})
+})
+
+//Updates and changes an existing pokemon type
+app.put("/api/pokemontypes", (request, response) => {
+	console.log("Updating pokemon type")
+	let body = request.body
+	let updatepokemontype = "UPDATE pokemontypes SET typeID = ? WHERE pokemonID = ? AND typeID = ?"
+	//Takes in a JSON with keys of pokemonID, oldID (old type ID), newID (new type ID)
+	database.run(updatepokemontype, [body.newID, body.pokemonID, body.oldID], (error) => {
+		if (error) {
+			console.error(new Error("Could not update type", error))
+			response.send("Could not update type")
+		}
+		else response.send("type updated!")
+	})
+})
+
+//Deletes an existing type
+app.delete("/api/pokemontypes", (request,response) => {
+	console.log("Deleting a type")
+	let body = request.body
+	let deletepokemontype = "DELETE FROM pokemontypes WHERE pokemonID = ? AND typeID = ? "
+	//Takes in a JSON with keys of pokemonID and typeID that is to be deleted
+	database.run(deletepokemontype, [body.pokemonID, body.typeID], (error) => {
+		if (error) {
+			console.error(new Error("Could not delete pokemon type"))
+		}
+		else response.send("Type deleted!")
 	})
 })
 
