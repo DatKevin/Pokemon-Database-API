@@ -74,6 +74,7 @@ Post /api/pokemon (requires JSON body)
 
 ## Types
 A trait that determines a Pokemon's strength and weakness against other types
+
 | Route  | url               | Description                        |
 |--------|-------------------|------------------------------------|
 | GET    | /api/types/{id} | Reads one type with the same ID |
@@ -81,6 +82,7 @@ A trait that determines a Pokemon's strength and weakness against other types
 | POST   | /api/types/     | Creates one new type. Requires a JSON body with keys listed in the POST example below            |
 | PUT    | /api/types/{id} | Updates one type based on ID. Requires a JSON body with keys listed in the POST example below    |
 | DELETE | /api/types/{id} | Deletes one type based on ID    |
+
 Get /api/types/{id}
 ```
 {
@@ -100,6 +102,7 @@ Post /api/types (requires JSON body)
 
 ## Ability
 A trait that provides an additional effect for a Pokemon. Each Pokemon can only have one ability at a time and the same ability can be on different Pokemon
+
 | Route  | url               | Description                        |
 |--------|-------------------|------------------------------------|
 | GET    | /api/abilities/{id} | Reads one ability with the same ID |
@@ -107,6 +110,7 @@ A trait that provides an additional effect for a Pokemon. Each Pokemon can only 
 | POST   | /api/abilities/     | Creates one new ability. Requires a JSON body with keys listed in the POST example below            |
 | PUT    | /api/abilities/{id} | Updates one ability based on ID. Requires a JSON body with keys listed in the POST example below    |
 | DELETE | /api/abilities/{id} | Deletes one ability based on ID    |
+
 Get /api/abilities/{id}
 ```
 {
@@ -129,6 +133,7 @@ Post /api/abilities/ (requires JSON body)
 
 ## Moves
 An attack a Pokemon can use in battle. Each Pokemon can have up to 4 moves and multiple Pokemon can learn the same move
+
 | Route  | url               | Description                        |
 |--------|-------------------|------------------------------------|
 | GET    | /api/moves/{id} | Reads one move with the same ID |
@@ -136,6 +141,7 @@ An attack a Pokemon can use in battle. Each Pokemon can have up to 4 moves and m
 | POST   | /api/moves/     | Creates one new move. Requires a JSON body with keys listed in the POST example below            |
 | PUT    | /api/moves/{id} | Updates one move based on ID. Requires a JSON body with keys listed in the POST example below    |
 | DELETE | /api/moves/{id} | Deletes one move based on ID    |
+
 Get /api/moves/{id}
 ```
 {
@@ -170,6 +176,7 @@ Post /api/moves/ (requires JSON body)
 
 ### Pokemon Move Sets
 Join table that shows the many to many relationship of Pokemon and the moves they can learn. 
+
 | Route  | url               | Description                        |
 |--------|-------------------|------------------------------------|
 | GET    | /api/movesets/{id} | Reads one moveset with the same ID |
@@ -177,6 +184,7 @@ Join table that shows the many to many relationship of Pokemon and the moves the
 | POST   | /api/movesets/     | Creates one new moveset. Requires a JSON body with keys listed in the POST example below            |
 | PUT    | /api/movesets/ | Updates one moveset based on ID. Requires a JSON body with keys listed in the PUT example below    |
 | DELETE | /api/movesets/ | Deletes one moveset based on ID. Requires a JSON body with keys listed in the DELETE example below    |
+
 Get /api/movesets/{id}
 ```
     {
@@ -229,6 +237,7 @@ Put /api/movesets (requires JSON body)
 ```
 ### Pokemon Types
 Join table that shows the many to many relationship of Pokemon and their typing. 
+
 | Route  | url               | Description                        |
 |--------|-------------------|------------------------------------|
 | GET    | /api/pokemontypes/{id} | Reads one Pokemon's type with the same ID |
@@ -236,6 +245,7 @@ Join table that shows the many to many relationship of Pokemon and their typing.
 | POST   | /api/pokemontypes/     | Creates one new Pokemon's type. Requires a JSON body with keys listed in the POST example below            |
 | PUT    | /api/pokemontypes/ | Updates one Pokemon's type based on ID. Requires a JSON body with keys listed in the PUT example below    |
 | DELETE | /api/pokemontypes/ | Deletes one Pokemon's type based on ID. Requires a JSON body with keys listed in the DELETE example below    |
+
 Get /api/pokemontypes/{id}
 ```
 {
